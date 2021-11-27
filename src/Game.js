@@ -4,6 +4,7 @@ import { calculateWinner } from "./calculateWinner";
 
 export class Game extends React.Component {
 
+
   constructor(props) {
     super(props);
     this.state = {
@@ -12,6 +13,8 @@ export class Game extends React.Component {
         squares: Array(9).fill(null),
       }],
       stepNumber: 0,
+      toggle: false,
+      winningLine: null,
     };
   }
 
@@ -35,6 +38,10 @@ export class Game extends React.Component {
     history.push(squares);
   }
 
+  flipToggle(toggle) {
+    this.setState({toggle: !toggle});
+  }
+
   jumpTo(step) {
     this.setState({
       stepNumber: step,
@@ -55,43 +62,58 @@ export class Game extends React.Component {
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
-    let status;
+    let status = this.gameStatus(current);
     const moves = this.generateHistory(history);
-
-    if (!winner) {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    } else {
-      status = 'Winner: ' + winner;
-    }
     return (
       <div className="game">
         <div className="game-board">
           <Board
             squares={current.squares}
-            onClick={i => this.handleClick(i) } />
+            onClick={i => this.handleClick(i) }
+            winningLine = {this.state.winningLine}
+             />
         </div>
         <div className="game-info">
           <div>{status}</div>
           <ol>{moves}</ol>
+          <button onClick={() => this.flipToggle(this.state.toggle)}>Reverse history</button>
         </div>
       </div>
     );
   }
 
+  gameStatus(current) {
+    const winner = calculateWinner(current.squares);
+    let status;
+    if (winner) {
+      this.state.winningLine = winner[1];
+      status = 'Winner: ' + winner[0];
+    }
+    else if (this.state.stepNumber == 9) {
+      status = "Draw";
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
+    return status;
+  }
+
   generateHistory(history) {
     const ACTIVE = { fontWeight: 'bold'};
     const INACTIVE = { fontWeight: 'normal'};
-    return history.map((step, move) => {
-      let coord = this.calcRow(step.latest) + ',' + (step.latest%3);
+
+    const listOfMoves = history.map((step, move) => {
+      let coord = this.calcRow(step.latest) + ',' + (step.latest % 3);
       const desc = move
-        ? 'go to move #' + move + ' ' + coord
+        ? 'go to move #' + move + ' (' + coord + ')'
         : 'go to game start';
+      const currentMove = this.state.stepNumber === move;
       return (
         <li>
-          <button key={move} style={this.state.stepNumber === move ? ACTIVE : INACTIVE} onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button key={move} style={currentMove ? ACTIVE : INACTIVE} onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
       );
     });
+    
+    return this.state.toggle ?  listOfMoves : listOfMoves.reverse();
   }
 }

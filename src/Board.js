@@ -1,19 +1,24 @@
 import React from 'react';
 import { Square } from "./Square";
 
+const ROWS = 3;
 export class Board extends React.Component {
   renderSquare(i) {
+    let winningSquare = this.props.winningLine != null && this.props.winningLine.includes(i);
+    console.log(winningSquare);
     return (
       <Square
         value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)} />
+        onClick={() => this.props.onClick(i)}
+        winningSquare = {winningSquare}
+         />
     );
   }
 
-  renderRows(r) {
+  renderRows(row) {
     let res = [];
     for (var i = 0; i < 3; i ++ ) {
-      res.push(this.renderSquare(3*r+i));
+      res.push(this.renderSquare(ROWS*row+i));
     }
     return <div>{res}</div>
   }
@@ -26,24 +31,5 @@ export class Board extends React.Component {
     return (
       <div>{rows}</div>
     )
-    // return (
-    //   <div>
-    //     <div className="board-row">
-    //       {this.renderSquare(0)}
-    //       {this.renderSquare(1)}
-    //       {this.renderSquare(2)}
-    //     </div>
-    //     <div className="board-row">
-    //       {this.renderSquare(3)}
-    //       {this.renderSquare(4)}
-    //       {this.renderSquare(5)}
-    //     </div>
-    //     <div className="board-row">
-    //       {this.renderSquare(6)}
-    //       {this.renderSquare(7)}
-    //       {this.renderSquare(8)}
-    //     </div>
-    //   </div>
-    // );
   }
 }
